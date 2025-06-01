@@ -1,0 +1,47 @@
+{% extends "dental_reports/base.html" %}
+
+{% block title %}Informes | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1>Informes Generados</h1>
+    </div>
+</div>
+
+{% if reports %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Plantilla</th>
+                <th>Paciente</th>
+                <th>Doctor</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr>
+                <td>{{ report.title }}</td>
+                <td>{{ report.template.name }}</td>
+                <td>{{ report.patient_name }}</td>
+                <td>{{ report.doctor_name }}</td>
+                <td>{{ report.created_at|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <a href="{% url 'report_detail' pk=report.pk %}" class="btn btn-sm btn-info">Ver</a>
+                    {% if report.pdf_file %}
+                    <a href="{{ report.pdf_file.url }}" class="btn btn-sm btn-secondary" target="_blank">PDF</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="alert alert-info">
+        No hay informes generados aún.
+    </div>
+{% endif %}
+{% endblock %}

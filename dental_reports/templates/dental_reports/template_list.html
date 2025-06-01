@@ -1,0 +1,49 @@
+{% extends "dental_reports/base.html" %}
+
+{% block title %}Plantillas | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Plantillas de Informes</h1>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'template_create' %}" class="btn btn-success">Nueva plantilla</a>
+    </div>
+</div>
+
+{% if templates %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Especialidad</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for template in templates %}
+            <tr>
+                <td>{{ template.name }}</td>
+                <td>{{ template.category.name }}</td>
+                <td>{{ template.specialty.name|default:"Sin especialidad" }}</td>
+                <td>
+                    <a href="{% url 'template_detail' pk=template.pk %}" class="btn btn-sm btn-info">Ver</a>
+                    <a href="{% url 'template_edit' pk=template.pk %}" class="btn btn-sm btn-primary">Editar</a>
+                    <a href="{% url 'generate_report' template_id=template.pk %}" class="btn btn-sm btn-success">Generar informe</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="alert alert-info">
+        No hay plantillas creadas aún. <a href="{% url 'template_create' %}">Crea una nueva plantilla</a>.
+    </div>
+{% endif %}
+{% endblock %}
+
+<a href="{% url 'category_list' %}" class="btn btn-secondary">
+    <i class="fas fa-list me-1"></i>Ver Categorías
+</a>

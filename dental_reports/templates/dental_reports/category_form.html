@@ -1,0 +1,42 @@
+{% extends "dental_reports/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if is_new %}Nueva{% else %}Editar{% endif %} Categoría | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>{% if is_new %}Nueva{% else %}Editar{% endif %} Categoría</h2>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'category_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Categorías
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Información de la Categoría</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    
+                    <div class="mt-4 text-end">
+                        <a href="{% url 'category_list' %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">
+                            {% if is_new %}Crear{% else %}Guardar{% endif %} Categoría
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

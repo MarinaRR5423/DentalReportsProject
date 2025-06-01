@@ -1,0 +1,334 @@
+{% extends "dental_reports/base.html" %}
+{% load static %}
+
+{% block title %}
+    Vista Previa: {{ plantilla.nombre }} | Dental Reports
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Vista Previa: {{ plantilla.nombre }}</h1>
+        <div>
+            <a href="{% url 'dental_reports:editor_visual' template_id=plantilla.id %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            <button class="btn btn-success" onclick="window.print()">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div id="preview-container" class="preview-content">
+                <!-- Aquí se renderizará el contenido de la plantilla -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cargar los datos de la plantilla
+        const plantillaData = {{ plantilla.contenido|safe }};
+        const datos = {{ datos_ejemplo|safe }};
+
+        const container = document.getElementById('preview-container');
+
+        // Aplicar estilo si existe
+        if (plantillaData.fields && plantillaData.fields.style) {
+            container.className = `preview-content preview-style-${plantillaData.fields.style}`;
+        }
+
+        // Añadir encabezado si existe
+        if (plantillaData.fields && plantillaData.fields.header) {
+            const headerEl = document.createElement('div');
+            headerEl.className = 'mb-4 text-center';
+            headerEl.innerHTML = `<h3>${plantillaData.fields.header}</h3>`;
+            container.appendChild(headerEl);
+        }
+
+        // Añadir logo si está seleccionado
+        if (plantillaData.fields && plantillaData.fields.includeLogo) {
+            const logoEl = document.createElement('div');
+            logoEl.className = 'text-center mb-3';
+            logoEl.innerHTML = '<img src="/static/dental_reports/img/logo-placeholder.png" alt="Logo" height="60">';
+            container.appendChild(logoEl);
+        }
+
+        // Procesar campos predefinidos si existen
+        if (plantillaData.fields && plantillaData.fields.predefined && plantillaData.fields.predefined.length > 0) {
+            // Agrupar campos por categoría
+            const patientFields = plantillaData.fields.predefined.filter(f =>
+                ['nombrePaciente', 'fechaNacimiento', 'edad', 'telefono', 'email'].includes(f));
+
+            const clinicalFields = plantillaData.fields.predefined.filter(f =>
+                ['diagnostico', 'tratamiento', 'piezaDental', 'fechaConsulta', 'proximaCita'].includes(f));
+
+            // Crear sección de datos del paciente
+            if (patientFields.length > 0) {
+                const patientSection = document.createElement('div');
+                patientSection.className = 'mb-4';
+                patientSection.innerHTML = '<h4>Datos del Paciente</h4>';
+
+                const patientTable = document.createElement('table');
+                patientTable.className = 'table table-bordered';
+
+                // Añadir filas para cada campo del paciente
+                if (patientFields.includes('nombrePaciente')) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<th>Nombre:</th><td>${datos.nombrePaciente}</td>`;
+                    patientTable.appendChild(tr);
+                }
+
+                if (patientFields.includes('edad')) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<th>Edad:</th><td>${datos.edadPaciente} años</td>`;
+                    patientTable.appendChild(tr);
+                }
+
+                if (patientFields.includes('telefono')) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<th>Teléfono:</th><td>+34 612 345 678 (ejemplo)</td>`;
+                    patientTable.appendChild(tr);
+                }
+
+                if (patientFields.includes('email')) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<th>Email:</th><td>paciente@ejemplo.com</td>`;
+                    patientTable.appendChild(tr);
+                }
+
+                patientSection.appendChild(patientTable);
+                container.appendChild(patientSection);
+            }
+
+            // Crear sección de datos clínicos
+            if (clinicalFields.length > 0) {
+                const clinicalSection = document.createElement('div');
+                clinicalSection.className = 'mb-4';
+                clinicalSection.innerHTML = '<h4>Datos Clínicos</h4>';
+
+                const clinicalTable = document.createElement('table');
+                clinicalTable.className = 'table table-bordered';
+
+                // Añadir filas para cada campo clínico
+                if (clinicalFields.includes('diagnostico')) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<th>Diagnóstico:</th><td>${datos.diagnostico}</td>`;
+                    clinicalTable.appendChild(tr);
+                }
+
+                if (clinicalFields.includes('tratamiento')) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<th>Tratamiento:</th><td>${datos.tratamiento}</td>`;
+                    clinicalTable.appendChild(tr);
+                }
+
+                if (clinicalFields.includes('piezaDental')) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<th>Pieza Dental:</th><td>36 - Primer molar inferior izquierdo</td>`;
+                    clinicalTable.appendChild(tr);
+                }
+
+                if (clinicalFields.includes('fechaConsulta')) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<th>Fecha de Consulta:</th><td>${datos.fechaConsulta}</td>`;
+                    clinicalTable.appendChild(tr);
+                }
+
+                if (clinicalFields.includes('proximaCita')) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<th>Próxima Cita:</th><td>${datos.proximaCita}</td>`;
+                    clinicalTable.appendChild(tr);
+                }
+
+                clinicalSection.appendChild(clinicalTable);
+                container.appendChild(clinicalSection);
+            }
+        }
+
+        // Procesar campos personalizados
+        if (plantillaData.fields && plantillaData.fields.custom && plantillaData.fields.custom.length > 0) {
+            const customSection = document.createElement('div');
+            customSection.className = 'mb-4';
+            customSection.innerHTML = '<h4>Campos Personalizados</h4>';
+
+            const customTable = document.createElement('table');
+            customTable.className = 'table table-bordered';
+
+            plantillaData.fields.custom.forEach(field => {
+                const tr = document.createElement('tr');
+
+                // Generar valores de ejemplo según el tipo
+                let exampleValue = '';
+                switch (field.type) {
+                    case 'text': exampleValue = 'Texto de ejemplo'; break;
+                    case 'number': exampleValue = '42'; break;
+                    case 'date': exampleValue = '01/01/2025'; break;
+                    case 'textarea': exampleValue = 'Área de texto con contenido extenso...'; break;
+                    case 'select': exampleValue = 'Opción seleccionada'; break;
+                }
+
+                tr.innerHTML = `<th>${field.name}:</th><td>${exampleValue}</td>`;
+                customTable.appendChild(tr);
+            });
+
+            customSection.appendChild(customTable);
+            container.appendChild(customSection);
+        }
+
+        // Renderizar bloques si existen
+        if (plantillaData.blocks && plantillaData.blocks.length > 0) {
+            const blocksSection = document.createElement('div');
+            blocksSection.className = 'mb-4';
+            blocksSection.innerHTML = '<h4>Contenido Visual</h4>';
+
+            plantillaData.blocks.forEach(bloque => {
+                const blockElement = document.createElement('div');
+                blockElement.className = 'preview-block mb-3';
+                blockElement.innerHTML = bloque.content;
+
+                // Procesar variables en el contenido
+                processVariables(blockElement, datos);
+
+                // Procesar condiciones en el contenido
+                processConditions(blockElement, datos);
+
+                blocksSection.appendChild(blockElement);
+            });
+
+            container.appendChild(blocksSection);
+        }
+
+        // Añadir pie de página
+        if (plantillaData.fields && plantillaData.fields.footer) {
+            const footerEl = document.createElement('div');
+            footerEl.className = 'mt-5 pt-3 border-top text-center';
+            footerEl.innerHTML = plantillaData.fields.footer;
+            container.appendChild(footerEl);
+        }
+
+        // Si no hay contenido
+        if (container.children.length === 0) {
+            container.innerHTML = '<p class="text-muted">Esta plantilla no tiene contenido.</p>';
+        }
+    });
+
+    // Función para procesar variables en el contenido
+    function processVariables(element, data) {
+        // Buscar text nodes que contengan variables
+        const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+        const textNodes = [];
+        let current;
+
+        while (current = walker.nextNode()) {
+            textNodes.push(current);
+        }
+
+        textNodes.forEach(node => {
+            let text = node.nodeValue;
+
+            // Buscar patrones de variables {nombreVariable}
+            const variablePattern = /{([^}]+)}/g;
+            let match;
+            let newText = text;
+
+            while (match = variablePattern.exec(text)) {
+                const variableName = match[1];
+                if (data[variableName] !== undefined) {
+                    newText = newText.replace(`{${variableName}}`, data[variableName]);
+                }
+            }
+
+            node.nodeValue = newText;
+        });
+    }
+
+    // Función para procesar condiciones en el contenido
+    function processConditions(element, data) {
+        // Buscar elementos de condición
+        const conditionWrappers = element.querySelectorAll('.condition-wrapper');
+
+        conditionWrappers.forEach(wrapper => {
+            const conditionExpr = wrapper.querySelector('.condition-expression');
+            const conditionContent = wrapper.querySelector('.condition-content');
+            const elseContent = wrapper.querySelector('.condition-else-content');
+
+            if (conditionExpr && conditionContent && elseContent) {
+                // Obtener la expresión de condición (eliminar el "Si " inicial)
+                const expr = conditionExpr.textContent.replace(/^Si\s+/, '');
+
+                // Evaluar la condición (simplificada para este ejemplo)
+                let isTrue = false;
+
+                // Ejemplos de condiciones simples
+                if (expr === 'edadPaciente > 40' && parseInt(data.edadPaciente) > 40) {
+                    isTrue = true;
+                } else if (expr === 'edadPaciente <= 40' && parseInt(data.edadPaciente) <= 40) {
+                    isTrue = true;
+                } else if (expr.includes('diagnostico') && data.diagnostico.toLowerCase().includes(expr.split('contiene')[1]?.trim().toLowerCase())) {
+                    isTrue = true;
+                }
+
+                // Crear un nuevo elemento con el contenido adecuado
+                const resultElement = document.createElement('div');
+                resultElement.className = 'condition-result';
+                resultElement.innerHTML = isTrue ? conditionContent.innerHTML : elseContent.innerHTML;
+
+                // Procesar variables dentro del resultado de la condición
+                processVariables(resultElement, data);
+
+                // Reemplazar el contenedor de condición con el resultado
+                wrapper.parentNode.replaceChild(resultElement, wrapper);
+            }
+        });
+    }
+</script>
+
+<style>
+    .preview-style-formal {
+        font-family: 'Times New Roman', Times, serif;
+        line-height: 1.6;
+    }
+
+    .preview-style-moderno {
+        font-family: Arial, sans-serif;
+        line-height: 1.5;
+    }
+
+    .preview-style-minimalista {
+        font-family: Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .preview-style-profesional {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+    }
+
+    @media print {
+        .navbar, .btn, footer {
+            display: none !important;
+        }
+
+        .card {
+            border: none !important;
+        }
+
+        .card-body {
+            padding: 0 !important;
+        }
+
+        @page {
+            size: A4;
+            margin: 1.5cm;
+        }
+    }
+</style>
+{% endblock %}

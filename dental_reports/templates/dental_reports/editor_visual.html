@@ -1,0 +1,563 @@
+{% extends "dental_reports/base.html" %}
+{% load static %}
+
+{% block title %}
+    {% if plantilla %}Editar{% else %}Nueva{% endif %} Plantilla Visual | Dental Reports
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{% if plantilla %}Editar{% else %}Nueva{% endif %} Plantilla Dental</h1>
+        <div>
+            <a href="{% url 'dental_reports:template_list' %}" class="btn btn-secondary">
+                <i class="fas fa-list"></i> Lista de Plantillas
+            </a>
+            {% if plantilla.id %}
+            <a href="{% url 'dental_reports:template_preview' plantilla.id %}" class="btn btn-info">
+                <i class="fas fa-eye"></i> Vista Previa
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% csrf_token %}
+    <input type="hidden" id="template-id" value="{% if plantilla %}{{ plantilla.id }}{% endif %}">
+
+    <div class="form-group mb-3">
+        <label for="template-name">Nombre de la plantilla:</label>
+        <input type="text" id="template-name" class="form-control" value="{% if plantilla %}{{ plantilla.nombre }}{% else %}Nueva Plantilla Dental{% endif %}">
+    </div>
+
+    <!-- Pestañas para alternar entre el editor visual y el editor de campos -->
+    <ul class="nav nav-tabs mb-3" id="editorTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="visual-tab" data-bs-toggle="tab" data-bs-target="#visual-editor" type="button" role="tab" aria-controls="visual-editor" aria-selected="true">Editor Visual</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="fields-tab" data-bs-toggle="tab" data-bs-target="#fields-editor" type="button" role="tab" aria-controls="fields-editor" aria-selected="false">Campos Predefinidos</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="editorTabContent">
+        <!-- Editor visual tipo Scratch -->
+        <div class="tab-pane fade show active" id="visual-editor" role="tabpanel" aria-labelledby="visual-tab">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Editor Visual de Bloques</h5>
+                </div>
+                <div class="card-body">
+                    <div class="visual-editor-container">
+                        <div class="blocks-palette">
+                            {% for tipo in tipos_bloques %}
+                            <div class="block-category">
+                                <h5>{{ tipo.nombre }}</h5>
+                                {% for bloque in bloques|get_item:tipo.nombre %}
+                                <div class="block {{ tipo.color }}"
+                                     data-template="{{ bloque.plantilla_html }}"
+                                     data-type="{{ tipo.nombre|lower }}-block">
+                                    {{ bloque.nombre }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="workspace">
+                            <!-- Se llenará al arrastrar bloques -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Editor de campos predefinidos -->
+        <div class="tab-pane fade" id="fields-editor" role="tabpanel" aria-labelledby="fields-tab">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Campos Predefinidos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Datos del Paciente</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input field-checkbox" type="checkbox" value="nombrePaciente" id="field-nombrePaciente">
+                                <label class="form-check-label" for="field-nombrePaciente">Nombre del Paciente</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input field-checkbox" type="checkbox" value="fechaNacimiento" id="field-fechaNacimiento">
+                                <label class="form-check-label" for="field-fechaNacimiento">Fecha de Nacimiento</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input field-checkbox" type="checkbox" value="edad" id="field-edad">
+                                <label class="form-check-label" for="field-edad">Edad</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input field-checkbox" type="checkbox" value="telefono" id="field-telefono">
+                                <label class="form-check-label" for="field-telefono">Teléfono</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input field-checkbox" type="checkbox" value="email" id="field-email">
+                                <label class="form-check-label" for="field-email">Email</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Datos Clínicos</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input field-checkbox" type="checkbox" value="diagnostico" id="field-diagnostico">
+                                <label class="form-check-label" for="field-diagnostico">Diagnóstico</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input field-checkbox" type="checkbox" value="tratamiento" id="field-tratamiento">
+                                <label class="form-check-label" for="field-tratamiento">Tratamiento</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input field-checkbox" type="checkbox" value="piezaDental" id="field-piezaDental">
+                                <label class="form-check-label" for="field-piezaDental">Pieza Dental</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input field-checkbox" type="checkbox" value="fechaConsulta" id="field-fechaConsulta">
+                                <label class="form-check-label" for="field-fechaConsulta">Fecha de Consulta</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input field-checkbox" type="checkbox" value="proximaCita" id="field-proximaCita">
+                                <label class="form-check-label" for="field-proximaCita">Próxima Cita</label>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6>Campos Personalizados</h6>
+                            <div id="custom-fields-container">
+                                <!-- Aquí se añadirán dinámicamente los campos personalizados -->
+                            </div>
+                            <button type="button" id="add-custom-field" class="btn btn-sm btn-outline-primary mt-2">
+                                <i class="fas fa-plus"></i> Añadir Campo Personalizado
+                            </button>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6>Opciones de Formato</h6>
+                            <div class="mb-3">
+                                <label for="template-header" class="form-label">Encabezado de Informe:</label>
+                                <textarea id="template-header" class="form-control" rows="2"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="template-footer" class="form-label">Pie de Informe:</label>
+                                <textarea id="template-footer" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Estilo</h6>
+                            <div class="mb-3">
+                                <label for="template-style" class="form-label">Estilo de Documento:</label>
+                                <select id="template-style" class="form-select">
+                                    <option value="formal">Formal</option>
+                                    <option value="moderno">Moderno</option>
+                                    <option value="minimalista">Minimalista</option>
+                                    <option value="profesional">Profesional</option>
+                                </select>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="1" id="include-logo">
+                                <label class="form-check-label" for="include-logo">Incluir Logo del Gabinete</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Previsualización de los campos seleccionados -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Vista Previa de Campos</h5>
+                </div>
+                <div class="card-body">
+                    <div id="fields-preview" class="border p-3">
+                        <p class="text-muted">Selecciona campos para ver cómo quedarán en el informe.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <button id="save-button" class="btn btn-primary">
+            <i class="fas fa-save"></i> Guardar Plantilla
+        </button>
+        <a href="{% url 'dental_reports:template_list' %}" class="btn btn-secondary">
+            Cancelar
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'dental_reports/js/visual-editor.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar el editor visual con los datos de la plantilla si existe
+        {% if plantilla and plantilla.contenido %}
+            try {
+                const plantillaData = {{ plantilla.contenido|safe }};
+                if (plantillaData && Array.isArray(plantillaData.blocks)) {
+                    window.loadTemplateData(plantillaData.blocks);
+                }
+
+                // Cargar campos predefinidos si existen
+                if (plantillaData.fields) {
+                    loadPredefinedFields(plantillaData.fields);
+                }
+            } catch (e) {
+                console.error("Error al cargar los datos de la plantilla:", e);
+            }
+        {% endif %}
+
+        // Manejar campos predefinidos
+        const fieldCheckboxes = document.querySelectorAll('.field-checkbox');
+        fieldCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateFieldsPreview);
+        });
+
+        // Manejar campos personalizados
+        document.getElementById('add-custom-field').addEventListener('click', addCustomField);
+
+        // Actualizar vista previa al cambiar cualquier opción de formato
+        document.getElementById('template-header').addEventListener('input', updateFieldsPreview);
+        document.getElementById('template-footer').addEventListener('input', updateFieldsPreview);
+        document.getElementById('template-style').addEventListener('change', updateFieldsPreview);
+        document.getElementById('include-logo').addEventListener('change', updateFieldsPreview);
+
+        // Asignar el evento al botón de guardar plantilla
+        document.getElementById('save-button').addEventListener('click', saveCompleteTemplate);
+
+        // Actualizar vista previa inicial
+        updateFieldsPreview();
+    });
+
+    // Función para añadir un campo personalizado
+    function addCustomField() {
+        const container = document.getElementById('custom-fields-container');
+        const fieldCount = container.children.length;
+
+        const fieldRow = document.createElement('div');
+        fieldRow.className = 'row mb-2 custom-field-row';
+        fieldRow.innerHTML = `
+            <div class="col-5">
+                <input type="text" class="form-control form-control-sm custom-field-name" placeholder="Nombre del campo">
+            </div>
+            <div class="col-5">
+                <select class="form-select form-select-sm custom-field-type">
+                    <option value="text">Texto</option>
+                    <option value="number">Número</option>
+                    <option value="date">Fecha</option>
+                    <option value="textarea">Área de Texto</option>
+                    <option value="select">Lista Desplegable</option>
+                </select>
+            </div>
+            <div class="col-2">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-custom-field">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+
+        container.appendChild(fieldRow);
+
+        // Añadir evento al botón de eliminar
+        fieldRow.querySelector('.remove-custom-field').addEventListener('click', function() {
+            container.removeChild(fieldRow);
+            updateFieldsPreview();
+        });
+
+        // Añadir eventos a los inputs para actualizar la vista previa
+        fieldRow.querySelector('.custom-field-name').addEventListener('input', updateFieldsPreview);
+        fieldRow.querySelector('.custom-field-type').addEventListener('change', updateFieldsPreview);
+
+        updateFieldsPreview();
+    }
+
+    // Función para actualizar la vista previa de campos
+    function updateFieldsPreview() {
+        const previewContainer = document.getElementById('fields-preview');
+        previewContainer.innerHTML = '';
+
+        // Obtener estilo seleccionado
+        const style = document.getElementById('template-style').value;
+        const includeLogo = document.getElementById('include-logo').checked;
+
+        // Añadir encabezado
+        const header = document.getElementById('template-header').value;
+        if (header) {
+            const headerEl = document.createElement('div');
+            headerEl.className = 'mb-4 text-center';
+            headerEl.innerHTML = `<h3>${header}</h3>`;
+            previewContainer.appendChild(headerEl);
+        }
+
+        // Añadir logo si está seleccionado
+        if (includeLogo) {
+            const logoEl = document.createElement('div');
+            logoEl.className = 'text-center mb-3';
+            logoEl.innerHTML = '<img src="/static/dental_reports/img/logo-placeholder.png" alt="Logo" height="60">';
+            previewContainer.appendChild(logoEl);
+        }
+
+        // Crear tabla para campos de paciente seleccionados
+        const selectedPatientFields = Array.from(document.querySelectorAll('.field-checkbox'))
+            .filter(cb => cb.checked && cb.id.startsWith('field-nombrePaciente'))
+            .map(cb => cb.value);
+
+        if (selectedPatientFields.length > 0) {
+            const patientSection = document.createElement('div');
+            patientSection.className = 'mb-4';
+            patientSection.innerHTML = '<h4>Datos del Paciente</h4>';
+
+            const patientTable = document.createElement('table');
+            patientTable.className = 'table table-bordered';
+            patientTable.innerHTML = `
+                <tr>
+                    <th>Nombre:</th>
+                    <td>Juan Pérez (ejemplo)</td>
+                </tr>
+                <tr>
+                    <th>Fecha de Nacimiento:</th>
+                    <td>15/05/1980 (ejemplo)</td>
+                </tr>
+                <tr>
+                    <th>Edad:</th>
+                    <td>43 años (ejemplo)</td>
+                </tr>
+            `;
+
+            patientSection.appendChild(patientTable);
+            previewContainer.appendChild(patientSection);
+        }
+
+        // Crear sección para datos clínicos seleccionados
+        const selectedClinicalFields = Array.from(document.querySelectorAll('.field-checkbox'))
+            .filter(cb => cb.checked && (cb.id.startsWith('field-diagnostico') ||
+                                        cb.id.startsWith('field-tratamiento') ||
+                                        cb.id.startsWith('field-piezaDental')))
+            .map(cb => cb.value);
+
+        if (selectedClinicalFields.length > 0) {
+            const clinicalSection = document.createElement('div');
+            clinicalSection.className = 'mb-4';
+            clinicalSection.innerHTML = '<h4>Datos Clínicos</h4>';
+
+            const clinicalTable = document.createElement('table');
+            clinicalTable.className = 'table table-bordered';
+            clinicalTable.innerHTML = `
+                <tr>
+                    <th>Diagnóstico:</th>
+                    <td>Caries en molar inferior (ejemplo)</td>
+                </tr>
+                <tr>
+                    <th>Tratamiento:</th>
+                    <td>Empaste dental (ejemplo)</td>
+                </tr>
+                <tr>
+                    <th>Pieza Dental:</th>
+                    <td>36 - Primer molar inferior izquierdo (ejemplo)</td>
+                </tr>
+            `;
+
+            clinicalSection.appendChild(clinicalTable);
+            previewContainer.appendChild(clinicalSection);
+        }
+
+        // Crear sección para campos personalizados
+        const customFieldRows = document.querySelectorAll('.custom-field-row');
+        if (customFieldRows.length > 0) {
+            const customSection = document.createElement('div');
+            customSection.className = 'mb-4';
+            customSection.innerHTML = '<h4>Campos Personalizados</h4>';
+
+            const customTable = document.createElement('table');
+            customTable.className = 'table table-bordered';
+
+            customFieldRows.forEach(row => {
+                const fieldName = row.querySelector('.custom-field-name').value || 'Campo sin nombre';
+                const fieldType = row.querySelector('.custom-field-type').value;
+
+                let exampleValue = '';
+                switch (fieldType) {
+                    case 'text': exampleValue = 'Texto de ejemplo'; break;
+                    case 'number': exampleValue = '42'; break;
+                    case 'date': exampleValue = '01/01/2025'; break;
+                    case 'textarea': exampleValue = 'Área de texto con contenido extenso...'; break;
+                    case 'select': exampleValue = 'Opción seleccionada'; break;
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <th>${fieldName}:</th>
+                    <td>${exampleValue}</td>
+                `;
+                customTable.appendChild(tr);
+            });
+
+            customSection.appendChild(customTable);
+            previewContainer.appendChild(customSection);
+        }
+
+        // Añadir pie de página
+        const footer = document.getElementById('template-footer').value;
+        if (footer) {
+            const footerEl = document.createElement('div');
+            footerEl.className = 'mt-5 pt-3 border-top text-center';
+            footerEl.innerHTML = footer;
+            previewContainer.appendChild(footerEl);
+        }
+
+        // Si no hay campos seleccionados
+        if (previewContainer.children.length === 0) {
+            previewContainer.innerHTML = '<p class="text-muted">Selecciona campos para ver cómo quedarán en el informe.</p>';
+        }
+
+        // Aplicar estilo seleccionado
+        previewContainer.className = `border p-3 preview-style-${style}`;
+    }
+
+    // Función para cargar campos predefinidos desde datos guardados
+    function loadPredefinedFields(fields) {
+        // Marcar checkboxes de campos predefinidos
+        if (fields.predefined) {
+            fields.predefined.forEach(fieldName => {
+                const checkbox = document.getElementById(`field-${fieldName}`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+
+        // Cargar campos personalizados
+        if (fields.custom && fields.custom.length > 0) {
+            const container = document.getElementById('custom-fields-container');
+            container.innerHTML = ''; // Limpiar contenedor
+
+            fields.custom.forEach(field => {
+                const fieldRow = document.createElement('div');
+                fieldRow.className = 'row mb-2 custom-field-row';
+                fieldRow.innerHTML = `
+                    <div class="col-5">
+                        <input type="text" class="form-control form-control-sm custom-field-name" value="${field.name}" placeholder="Nombre del campo">
+                    </div>
+                    <div class="col-5">
+                        <select class="form-select form-select-sm custom-field-type">
+                            <option value="text" ${field.type === 'text' ? 'selected' : ''}>Texto</option>
+                            <option value="number" ${field.type === 'number' ? 'selected' : ''}>Número</option>
+                            <option value="date" ${field.type === 'date' ? 'selected' : ''}>Fecha</option>
+                            <option value="textarea" ${field.type === 'textarea' ? 'selected' : ''}>Área de Texto</option>
+                            <option value="select" ${field.type === 'select' ? 'selected' : ''}>Lista Desplegable</option>
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-custom-field">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(fieldRow);
+
+                // Añadir evento al botón de eliminar
+                fieldRow.querySelector('.remove-custom-field').addEventListener('click', function() {
+                    container.removeChild(fieldRow);
+                    updateFieldsPreview();
+                });
+
+                // Añadir eventos a los inputs para actualizar la vista previa
+                fieldRow.querySelector('.custom-field-name').addEventListener('input', updateFieldsPreview);
+                fieldRow.querySelector('.custom-field-type').addEventListener('change', updateFieldsPreview);
+            });
+        }
+
+        // Cargar opciones de formato
+        if (fields.header) document.getElementById('template-header').value = fields.header;
+        if (fields.footer) document.getElementById('template-footer').value = fields.footer;
+        if (fields.style) document.getElementById('template-style').value = fields.style;
+        if (fields.includeLogo) document.getElementById('include-logo').checked = fields.includeLogo;
+
+        // Actualizar vista previa
+        updateFieldsPreview();
+    }
+
+    // Función para guardar la plantilla completa (editor visual + campos predefinidos)
+    function saveCompleteTemplate() {
+        // Obtener datos del editor visual
+        const blocks = Array.from(document.querySelectorAll('.workspace .block-container')).map(block => {
+            return {
+                type: block.dataset.type,
+                content: block.querySelector('.block-content').innerHTML,
+                position: {
+                    x: parseInt(block.style.left),
+                    y: parseInt(block.style.top)
+                }
+            };
+        });
+
+        // Obtener campos predefinidos seleccionados
+        const predefinedFields = Array.from(document.querySelectorAll('.field-checkbox')).filter(cb => cb.checked).map(cb => cb.value);
+
+        // Obtener campos personalizados
+        const customFields = Array.from(document.querySelectorAll('.custom-field-row')).map(row => {
+            return {
+                name: row.querySelector('.custom-field-name').value,
+                type: row.querySelector('.custom-field-type').value
+            };
+        });
+
+        // Obtener opciones de formato
+        const header = document.getElementById('template-header').value;
+        const footer = document.getElementById('template-footer').value;
+        const style = document.getElementById('template-style').value;
+        const includeLogo = document.getElementById('include-logo').checked;
+
+        // Crear objeto de datos completo
+        const template = {
+            template_id: document.getElementById('template-id').value || '',
+            name: document.getElementById('template-name').value || 'Sin nombre',
+            blocks: blocks,
+            fields: {
+                predefined: predefinedFields,
+                custom: customFields,
+                header: header,
+                footer: footer,
+                style: style,
+                includeLogo: includeLogo
+            }
+        };
+
+        // Obtener el token CSRF
+        const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+
+        // Enviar la plantilla al servidor
+        fetch('/dental_reports/save-template-json/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(template)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.id) {
+                    document.getElementById('template-id').value = data.id;
+                }
+                alert('Plantilla guardada con éxito!');
+            } else {
+                alert('Error al guardar: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al guardar la plantilla');
+        });
+    }
+</script>
+{% endblock %}

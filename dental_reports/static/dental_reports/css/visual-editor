@@ -1,0 +1,172 @@
+.visual-editor-container {
+    display: flex;
+    min-height: 600px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.blocks-palette {
+    width: 250px;
+    background-color: #f5f5f5;
+    border-right: 1px solid #ddd;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.workspace {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    min-height: 600px;
+    background-color: #fff;
+    position: relative;
+}
+
+.block-category {
+    margin-bottom: 15px;
+}
+
+.block-category h5 {
+    padding: 5px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+/* Estilos para los bloques */
+.block {
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: move;
+    user-select: none;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.2s;
+}
+
+.block:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.block-container {
+    margin-bottom: 15px;
+    border: 2px solid transparent;
+    padding: 5px;
+    border-radius: 6px;
+}
+
+.block-container.selected {
+    border-color: #007bff;
+}
+
+.block-container .block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+}
+
+.block-container .block-content {
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    margin-top: 5px;
+}
+
+.block-container .block-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 5px;
+}
+
+.block-placeholder {
+    border: 2px dashed #ccc;
+    height: 40px;
+    margin: 10px 0;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+/* Colores para los diferentes tipos de bloques */
+.text-block {
+    background-color: #4CAF50;
+}
+
+.condition-block {
+    background-color: #FF9800;
+}
+
+.variable-block {
+    background-color: #2196F3;
+}
+
+.layout-block {
+    background-color: #673AB7;
+}
+
+.image-block {
+    background-color: #E91E63;
+}
+
+.table-block {
+    background-color: #009688;
+}
+
+/* Diseño de las configuraciones de bloques */
+.block-settings {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.block-settings label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.block-settings input,
+.block-settings select,
+.block-settings textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Estilos para bloques condicionales */
+.condition-content {
+    padding: 10px;
+    margin-top: 10px;
+    border-left: 3px solid #FF9800;
+    background-color: #FFF8E1;
+}
+
+.condition-else-content {
+    padding: 10px;
+    margin-top: 10px;
+    border-left: 3px solid #F44336;
+    background-color: #FFEBEE;
+}
+
+/* Previsualización */
+.preview-panel {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.preview-panel-header {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}

@@ -1,0 +1,855 @@
+       {% extends "dental_reports/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}
+    {% if template %}Editar{% else %}Nueva{% endif %} Plantilla | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>{% if template %}Editar{% else %}Nueva{% endif %} Plantilla</h1>
+
+        <!-- Pestañas para cambiar entre editor tradicional y editor visual -->
+        <ul class="nav nav-tabs mb-3" id="editorTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="traditional-tab" data-bs-toggle="tab"
+                        data-bs-target="#traditional-editor" type="button" role="tab"
+                        aria-controls="traditional-editor" aria-selected="true">
+                    Editor Tradicional
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="visual-tab" data-bs-toggle="tab"
+                        data-bs-target="#visual-editor" type="button" role="tab"
+                        aria-controls="visual-editor" aria-selected="false">
+                    Editor Visual
+                </button>
+            </li>
+        </ul>
+
+        <!-- Contenido de las pestañas -->
+        <div class="tab-content" id="editorTabContent">
+            <!-- Editor Tradicional (formulario actual) -->
+            <div class="tab-pane fade show active" id="traditional-editor" role="tabpanel" aria-labelledby="traditional-tab">
+                <form method="post" id="traditional-form">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                        <a href="{% url 'template_list' %}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Editor Visual (nuevo) -->
+            <div class="tab-pane fade" id="visual-editor" role="tabpanel" aria-labelledby="visual-tab">
+                <div class="visual-editor-form">
+                    {% csrf_token %}
+                    <input type="hidden" id="template-id" value="{% if template %}{{ template.id }}{% endif %}">
+
+                    <!-- Campo para el nombre de la plantilla -->
+                    <div class="form-group mb-3">
+                        <label for="template-name">Nombre de la plantilla:</label>
+                        <input type="text" id="template-name" class="form-control"
+                               value="{% if template %}{{ template.name }}{% else %}Nueva Plantilla Dental{% endif %}">
+                    </div>
+
+                    <!-- Categoría y especialidad (tomados del formulario tradicional) -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="template-category">Categoría:</label>
+                                <select id="template-category" class="form-control">
+                                    <option value="">-- Seleccionar --</option>
+                                    {% for category in form.category.field.queryset %}
+                                    <option value="{{ category.id }}"
+                                            {% if template.category.id == category.id %}selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="template-specialty">Especialidad:</label>
+                                <select id="template-specialty" class="form-control">
+                                    <option value="">-- Seleccionar --</option>
+                                    {% for specialty in form.specialty.field.queryset %}
+                                    <option value="{{ specialty.id }}"
+                                            {% if template.specialty.id == specialty.id %}selected{% endif %}>
+                                        {{ specialty.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Editor visual -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Editor Visual de Plantilla</h5>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-info" id="toggle-fields-btn">
+                                    <i class="fas fa-cog"></i> Campos Predefinidos
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Panel de campos predefinidos (inicialmente oculto) -->
+                            <div id="fields-panel" class="mb-3" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Datos del Paciente</h6>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input field-checkbox" type="checkbox" value="nombrePaciente" id="field-nombrePaciente">
+                                            <label class="form-check-label" for="field-nombrePaciente">Nombre del Paciente</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input field-checkbox" type="checkbox" value="fechaNacimiento" id="field-fechaNacimiento">
+                                            <label class="form-check-label" for="field-fechaNacimiento">Fecha de Nacimiento</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input field-checkbox" type="checkbox" value="edad" id="field-edad">
+                                            <label class="form-check-label" for="field-edad">Edad</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input field-checkbox" type="checkbox" value="telefono" id="field-telefono">
+                                            <label class="form-check-label" for="field-telefono">Teléfono</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input field-checkbox" type="checkbox" value="email" id="field-email">
+                                            <label class="form-check-label" for="field-email">Email</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Datos Clínicos</h6>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input field-checkbox" type="checkbox" value="diagnostico" id="field-diagnostico">
+                                            <label class="form-check-label" for="field-diagnostico">Diagnóstico</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input field-checkbox" type="checkbox" value="tratamiento" id="field-tratamiento">
+                                            <label class="form-check-label" for="field-tratamiento">Tratamiento</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input field-checkbox" type="checkbox" value="piezaDental" id="field-piezaDental">
+                                            <label class="form-check-label" for="field-piezaDental">Pieza Dental</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input field-checkbox" type="checkbox" value="fechaConsulta" id="field-fechaConsulta">
+                                            <label class="form-check-label" for="field-fechaConsulta">Fecha de Consulta</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input field-checkbox" type="checkbox" value="proximaCita" id="field-proximaCita">
+                                            <label class="form-check-label" for="field-proximaCita">Próxima Cita</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h6>Campos Personalizados</h6>
+                                        <div id="custom-fields-container">
+                                            <!-- Aquí se añadirán dinámicamente los campos personalizados -->
+                                        </div>
+                                        <button type="button" id="add-custom-field" class="btn btn-sm btn-outline-primary mt-2">
+                                            <i class="fas fa-plus"></i> Añadir Campo Personalizado
+                                        </button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <h6>Opciones de Formato</h6>
+                                        <div class="mb-3">
+                                            <label for="template-header" class="form-label">Encabezado de Informe:</label>
+                                            <textarea id="template-header" class="form-control" rows="2"></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="template-footer" class="form-label">Pie de Informe:</label>
+                                            <textarea id="template-footer" class="form-control" rows="2"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Estilo</h6>
+                                        <div class="mb-3">
+                                            <label for="template-style" class="form-label">Estilo de Documento:</label>
+                                            <select id="template-style" class="form-select">
+                                                <option value="formal">Formal</option>
+                                                <option value="moderno">Moderno</option>
+                                                <option value="minimalista">Minimalista</option>
+                                                <option value="profesional">Profesional</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="1" id="include-logo">
+                                            <label class="form-check-label" for="include-logo">Incluir Logo del Gabinete</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end mt-3">
+                                    <button type="button" class="btn btn-primary" id="apply-fields-btn">
+                                        Aplicar Campos
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Editor visual de bloques -->
+                            <div class="visual-editor-container">
+                                <div class="blocks-palette">
+                                    {% for tipo in tipos_bloques %}
+                                    <div class="block-category">
+                                        <h5>{{ tipo.nombre }}</h5>
+                                        {% for bloque in bloques|get_item:tipo.nombre %}
+                                        <div class="block {{ tipo.color }}"
+                                             data-template="{{ bloque.plantilla_html }}"
+                                             data-type="{{ tipo.nombre|lower }}-block">
+                                            {{ bloque.nombre }}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="workspace">
+                                    <!-- Área donde se arrastrarán los bloques -->
+                                </div>
+                            </div>
+
+                            <!-- Previsualización de los campos seleccionados -->
+                            <div class="mt-4">
+                                <h6>Vista Previa de Campos</h6>
+                                <div id="fields-preview" class="border p-3">
+                                    <p class="text-muted">Selecciona campos para ver cómo quedarán en el informe.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción para el editor visual -->
+                    <div class="mt-3">
+                        <button type="button" id="save-template-button" class="btn btn-success">
+                            <i class="fas fa-save"></i> Guardar Plantilla
+                        </button>
+                        <a href="{% url 'template_list' %}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'dental_reports/css/visual-editor.css' %}">
+<style>
+    .visual-editor-container {
+        height: 500px;
+        border: 1px solid #ddd;
+        margin-top: 15px;
+    }
+
+    .preview-style-formal {
+        font-family: 'Times New Roman', Times, serif;
+        line-height: 1.6;
+    }
+
+    .preview-style-moderno {
+        font-family: Arial, sans-serif;
+        line-height: 1.5;
+    }
+
+    .preview-style-minimalista {
+        font-family: Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+    }
+
+    .preview-style-profesional {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+    }
+</style>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'dental_reports/js/visual-editor.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar el editor visual con los datos de la plantilla si existe
+        {% if template.contenido %}
+            try {
+                const templateData = {{ template.contenido|safe }};
+                if (templateData && Array.isArray(templateData.blocks)) {
+                    window.loadTemplateData(templateData.blocks);
+                }
+
+                // Cargar campos predefinidos si existen
+                if (templateData.fields) {
+                    loadPredefinedFields(templateData.fields);
+                }
+            } catch (e) {
+                console.error("Error al cargar los datos de la plantilla:", e);
+            }
+        {% endif %}
+
+        // Toggle para mostrar/ocultar panel de campos predefinidos
+        document.getElementById('toggle-fields-btn').addEventListener('click', function() {
+            const fieldsPanel = document.getElementById('fields-panel');
+            if (fieldsPanel.style.display === 'none') {
+                fieldsPanel.style.display = 'block';
+                this.innerHTML = '<i class="fas fa-times"></i> Cerrar Panel';
+            } else {
+                fieldsPanel.style.display = 'none';
+                this.innerHTML = '<i class="fas fa-cog"></i> Campos Predefinidos';
+            }
+        });
+
+        // Aplicar campos seleccionados
+        document.getElementById('apply-fields-btn').addEventListener('click', function() {
+            updateFieldsPreview();
+        });
+
+        // Manejar campos predefinidos
+        const fieldCheckboxes = document.querySelectorAll('.field-checkbox');
+        fieldCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                // Puedes actualizar la vista previa automáticamente o esperar al botón "Aplicar"
+                // updateFieldsPreview();
+            });
+        });
+
+        // Manejar campos personalizados
+        document.getElementById('add-custom-field').addEventListener('click', addCustomField);
+
+        // Asignar el evento al botón de guardar plantilla
+        document.getElementById('save-template-button').addEventListener('click', function() {
+            saveCompleteTemplate();
+        });
+
+        // Actualizar vista previa inicial si hay campos ya seleccionados
+        updateFieldsPreview();
+    });
+
+    // Función para añadir un campo personalizado
+    function addCustomField() {
+        const container = document.getElementById('custom-fields-container');
+        const fieldCount = container.children.length;
+
+        const fieldRow = document.createElement('div');
+        fieldRow.className = 'row mb-2 custom-field-row';
+        fieldRow.innerHTML = `
+            <div class="col-5">
+                <input type="text" class="form-control form-control-sm custom-field-name" placeholder="Nombre del campo">
+            </div>
+            <div class="col-5">
+                <select class="form-select form-select-sm custom-field-type">
+                    <option value="text">Texto</option>
+                    <option value="number">Número</option>
+                    <option value="date">Fecha</option>
+                    <option value="textarea">Área de Texto</option>
+                    <option value="select">Lista Desplegable</option>
+                </select>
+            </div>
+            <div class="col-2">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-custom-field">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+
+        container.appendChild(fieldRow);
+
+        // Añadir evento al botón de eliminar
+        fieldRow.querySelector('.remove-custom-field').addEventListener('click', function() {
+            container.removeChild(fieldRow);
+        });
+    }
+
+    // Función para cargar campos predefinidos desde datos guardados
+    function loadPredefinedFields(fields) {
+        // Marcar checkboxes de campos predefinidos
+        if (fields.predefined) {
+            fields.predefined.forEach(fieldName => {
+                const checkbox = document.getElementById(`field-${fieldName}`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+
+        // Cargar campos personalizados
+        if (fields.custom && fields.custom.length > 0) {
+            const container = document.getElementById('custom-fields-container');
+            container.innerHTML = ''; // Limpiar contenedor
+
+            fields.custom.forEach(field => {
+                const fieldRow = document.createElement('div');
+                fieldRow.className = 'row mb-2 custom-field-row';
+                fieldRow.innerHTML = `
+                    <div class="col-5">
+                        <input type="text" class="form-control form-control-sm custom-field-name" value="${field.name}" placeholder="Nombre del campo">
+                    </div>
+                    <div class="col-5">
+                        <select class="form-select form-select-sm custom-field-type">
+                            <option value="text" ${field.type === 'text' ? 'selected' : ''}>Texto</option>
+                            <option value="number" ${field.type === 'number' ? 'selected' : ''}>Número</option>
+                            <option value="date" ${field.type === 'date' ? 'selected' : ''}>Fecha</option>
+                            <option value="textarea" ${field.type === 'textarea' ? 'selected' : ''}>Área de Texto</option>
+                            <option value="select" ${field.type === 'select' ? 'selected' : ''}>Lista Desplegable</option>
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-custom-field">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(fieldRow);
+
+                // Añadir evento al botón de eliminar
+                fieldRow.querySelector('.remove-custom-field').addEventListener('click', function() {
+                    container.removeChild(fieldRow);
+                });
+            });
+        }
+
+        // Cargar opciones de formato
+        if (fields.header) document.getElementById('template-header').value = fields.header;
+        if (fields.footer) document.getElementById('template-footer').value = fields.footer;
+        if (fields.style) document.getElementById('template-style').value = fields.style;
+        if (fields.includeLogo) document.getElementById('include-logo').checked = fields.includeLogo;
+    }
+
+    // Función para actualizar la vista previa de campos
+    function updateFieldsPreview() {
+        const previewContainer = document.getElementById('fields-preview');
+        previewContainer.innerHTML = '';
+
+        // Obtener estilo seleccionado
+        const style = document.getElementById('template-style').value;
+        const includeLogo = document.getElementById('include-logo').checked;
+
+        // Aplicar estilo seleccionado
+        previewContainer.className = `border p-3 preview-style-${style}`;
+
+        // Añadir encabezado
+        const header = document.getElementById('template-header').value;
+        if (header) {
+            const headerEl = document.createElement('div');
+            headerEl.className = 'mb-4 text-center';
+            headerEl.innerHTML = `<h3>${header}</h3>`;
+            previewContainer.appendChild(headerEl);
+        }
+
+        // Añadir logo si está seleccionado
+        if (includeLogo) {
+            const logoEl = document.createElement('div');
+            logoEl.className = 'text-center mb-3';
+            logoEl.innerHTML = '<img src="/static/dental_reports/img/logo-placeholder.png" alt="Logo" height="60">';
+            previewContainer.appendChild(logoEl);
+        }
+
+        // Crear tabla para campos de paciente seleccionados
+        const selectedPatientFields = Array.from(document.querySelectorAll('.field-checkbox'))
+            .filter(cb => cb.checked && ['field-nombrePaciente', 'field-edad', 'field-telefono', 'field-email', 'field-fechaNacimiento'].includes(cb.id))
+            .map(cb => cb.value);
+
+        if (selectedPatientFields.length > 0) {
+            const patientSection = document.createElement('div');
+            patientSection.className = 'mb-4';
+            patientSection.innerHTML = '<h4>Datos del Paciente</h4>';
+
+            const patientTable = document.createElement('table');
+            patientTable.className = 'table table-bordered';
+            patientTable.style.width = '100%';
+
+            // Añadir filas para cada campo seleccionado
+            selectedPatientFields.forEach(field => {
+                const tr = document.createElement('tr');
+                let label = '';
+                let value = '';
+
+                switch(field) {
+                    case 'nombrePaciente':
+                        label = 'Nombre:';
+                        value = 'Juan Pérez (ejemplo)';
+                        break;
+                    case 'edad':
+                        label = 'Edad:';
+                        value = '45 años (ejemplo)';
+                        break;
+                    case 'fechaNacimiento':
+                        label = 'Fecha de Nacimiento:';
+                        value = '15/05/1980 (ejemplo)';
+                        break;
+                    case 'telefono':
+                        label = 'Teléfono:';
+                        value = '+34 612 345 678 (ejemplo)';
+                        break;
+                    case 'email':
+                        label = 'Email:';
+                        value = 'paciente@ejemplo.com';
+                        break;
+                }
+
+                tr.innerHTML = `<th style="width:30%">${label}</th><td>${value}</td>`;
+                patientTable.appendChild(tr);
+            });
+
+            patientSection.appendChild(patientTable);
+            previewContainer.appendChild(patientSection);
+        }
+
+        // Crear sección para datos clínicos seleccionados
+        const selectedClinicalFields = Array.from(document.querySelectorAll('.field-checkbox'))
+            .filter(cb => cb.checked && ['field-diagnostico', 'field-tratamiento', 'field-piezaDental',
+                                       'field-fechaConsulta', 'field-proximaCita'].includes(cb.id))
+            .map(cb => cb.value);
+
+        if (selectedClinicalFields.length > 0) {
+            const clinicalSection = document.createElement('div');
+            clinicalSection.className = 'mb-4';
+            clinicalSection.innerHTML = '<h4>Datos Clínicos</h4>';
+
+            const clinicalTable = document.createElement('table');
+            clinicalTable.className = 'table table-bordered';
+            clinicalTable.style.width = '100%';
+
+            // Añadir filas para cada campo seleccionado
+            selectedClinicalFields.forEach(field => {
+                const tr = document.createElement('tr');
+                let label = '';
+                let value = '';
+
+                switch(field) {
+                    case 'diagnostico':
+                        label = 'Diagnóstico:';
+                        value = 'Caries en molar inferior (ejemplo)';
+                        break;
+                    case 'tratamiento':
+                        label = 'Tratamiento:';
+                        value = 'Empaste dental (ejemplo)';
+                        break;
+                    case 'piezaDental':
+                        label = 'Pieza Dental:';
+                        value = '36 - Primer molar inferior izquierdo (ejemplo)';
+                        break;
+                    case 'fechaConsulta':
+                        label = 'Fecha de Consulta:';
+                        value = '08/05/2025 (ejemplo)';
+                        break;
+                    case 'proximaCita':
+                        label = 'Próxima Cita:';
+                        value = '22/05/2025 (ejemplo)';
+                        break;
+                }
+
+                tr.innerHTML = `<th style="width:30%">${label}</th><td>${value}</td>`;
+                clinicalTable.appendChild(tr);
+            });
+
+            clinicalSection.appendChild(clinicalTable);
+            previewContainer.appendChild(clinicalSection);
+        }
+
+        // Crear sección para campos personalizados
+        const customFieldRows = document.querySelectorAll('.custom-field-row');
+        if (customFieldRows.length > 0) {
+            const customSection = document.createElement('div');
+            customSection.className = 'mb-4';
+            customSection.innerHTML = '<h4>Campos Personalizados</h4>';
+
+            const customTable = document.createElement('table');
+            customTable.className = 'table table-bordered';
+            customTable.style.width = '100%';
+
+            customFieldRows.forEach(row => {
+                const fieldName = row.querySelector('.custom-field-name').value || 'Campo sin nombre';
+                const fieldType = row.querySelector('.custom-field-type').value;
+
+                let exampleValue = '';
+                switch (fieldType) {
+                    case 'text': exampleValue = 'Texto de ejemplo'; break;
+                    case 'number': exampleValue = '42'; break;
+                    case 'date': exampleValue = '01/01/2025'; break;
+                    case 'textarea': exampleValue = 'Área de texto con contenido extenso...'; break;
+                    case 'select': exampleValue = 'Opción seleccionada'; break;
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<th style="width:30%">${fieldName}:</th><td>${exampleValue}</td>`;
+                customTable.appendChild(tr);
+            });
+
+            customSection.appendChild(customTable);
+            previewContainer.appendChild(customSection);
+        }
+
+        // Añadir pie de página
+        const footer = document.getElementById('template-footer').value;
+        if (footer) {
+            const footerEl = document.createElement('div');
+            footerEl.className = 'mt-5 pt-3 border-top text-center';
+            footerEl.innerHTML = footer;
+            previewContainer.appendChild(footerEl);
+        }
+
+        // Si no hay campos seleccionados
+        if (previewContainer.children.length === 0) {
+            previewContainer.innerHTML = '<p class="text-muted">Selecciona campos para ver cómo quedarán en el informe.</p>';
+        }
+    }
+
+    // Función para guardar la plantilla completa
+    function saveCompleteTemplate() {
+        // Obtener bloques del editor visual
+        const blocks = Array.from(document.querySelectorAll('.workspace .block-container')).map(block => {
+            return {
+                type: block.dataset.type,
+                content: block.querySelector('.block-content').innerHTML,
+                position: {
+                    x: parseInt(block.style.left),
+                    y: parseInt(block.style.top)
+                }
+            };
+        });
+
+        // Obtener campos predefinidos seleccionados
+        const predefinedFields = Array.from(document.querySelectorAll('.field-checkbox'))
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+
+        // Obtener campos personalizados
+        const customFields = Array.from(document.querySelectorAll('.custom-field-row')).map(row => {
+            return {
+                name: row.querySelector('.custom-field-name').value || 'Campo sin nombre',
+                type: row.querySelector('.custom-field-type').value
+            };
+        });
+
+        // Obtener opciones de formato
+        const header = document.getElementById('template-header').value;
+        const footer = document.getElementById('template-footer').value;
+        const style = document.getElementById('template-style').value;
+        const includeLogo = document.getElementById('include-logo').checked;
+
+        // Obtener información básica del formulario
+        const templateId = document.getElementById('template-id').value;
+        const templateName = document.getElementById('template-name').value;
+        const categoryId = document.getElementById('template-category') ?
+                           document.getElementById('template-category').value : '';
+        const specialtyId = document.getElementById('template-specialty') ?
+                           document.getElementById('template-specialty').value : '';
+
+        // Crear objeto de datos completo
+        const template = {
+            template_id: templateId,
+            name: templateName,
+            category_id: categoryId,
+            specialty_id: specialtyId,
+            blocks: blocks,
+            fields: {
+                predefined: predefinedFields,
+                custom: customFields,
+                header: header,
+                footer: footer,
+                style: style,
+                includeLogo: includeLogo
+            }
+        };
+
+
+        // Obtener el token CSRF
+        const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+
+        // Mostrar indicador de carga
+        const saveButton = document.getElementById('save-template-button');
+        const originalButtonText = saveButton.innerHTML;
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        saveButton.disabled = true;
+
+        // Realizar petición AJAX para guardar la plantilla
+        fetch("{% url 'save_template_ajax' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(template)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Mostrar mensaje de éxito
+                alert('¡Plantilla guardada correctamente!');
+
+                // Redirigir a la lista de plantillas o a la vista de detalle
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                }
+            } else {
+                // Mostrar mensaje de error
+                alert('Error al guardar la plantilla: ' + data.error);
+                console.error('Error:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al guardar la plantilla');
+        })
+        .finally(() => {
+            // Restaurar estado del botón
+            saveButton.innerHTML = originalButtonText;
+            saveButton.disabled = false;
+        });
+    }
+    // Función para cargar los datos de una plantilla existente
+    window.loadTemplateData = function(blocks) {
+        const workspace = document.querySelector('.workspace');
+        workspace.innerHTML = ''; // Limpiar el espacio de trabajo
+
+        if (!blocks || !Array.isArray(blocks)) {
+            console.warn('No se encontraron bloques para cargar');
+            return;
+        }
+
+        // Añadir cada bloque al espacio de trabajo
+        blocks.forEach(block => {
+            // Crear contenedor de bloque
+            const blockContainer = document.createElement('div');
+            blockContainer.className = 'block-container';
+            blockContainer.dataset.type = block.type;
+
+            // Posicionar el bloque
+            if (block.position) {
+                blockContainer.style.left = `${block.position.x}px`;
+                blockContainer.style.top = `${block.position.y}px`;
+            }
+
+            // Añadir header del bloque
+            const blockHeader = document.createElement('div');
+            blockHeader.className = 'block-header';
+            blockHeader.innerHTML = `
+                <span>${block.type.replace('-block', '').toUpperCase()}</span>
+                <button type="button" class="btn-close btn-sm remove-block"></button>
+            `;
+            blockContainer.appendChild(blockHeader);
+
+            // Añadir contenido del bloque
+            const blockContent = document.createElement('div');
+            blockContent.className = 'block-content';
+            blockContent.innerHTML = block.content || '';
+            blockContainer.appendChild(blockContent);
+
+            // Añadir el bloque al espacio de trabajo
+            workspace.appendChild(blockContainer);
+
+            // Hacer el bloque arrastrable
+            makeBlockDraggable(blockContainer);
+
+            // Añadir evento para eliminar el bloque
+            blockContainer.querySelector('.remove-block').addEventListener('click', function() {
+                workspace.removeChild(blockContainer);
+            });
+
+            // Hacer el contenido editable
+            blockContent.contentEditable = true;
+        });
+    };
+    // Función para hacer un bloque arrastrable
+    function makeBlockDraggable(element) {
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        if (element.querySelector('.block-header')) {
+            // Si existe, el header del bloque será donde se hace clic para arrastrar
+            element.querySelector('.block-header').onmousedown = dragMouseDown;
+        } else {
+            // De lo contrario, el elemento en sí:
+            element.onmousedown = dragMouseDown;
+        }
+
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // Obtener la posición del cursor del mouse en el inicio:
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            // Llamar a una función cada vez que el cursor se mueva:
+            document.onmousemove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // Calcular la nueva posición del cursor:
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // Establecer la nueva posición del elemento:
+            element.style.top = (element.offsetTop - pos2) + "px";
+            element.style.left = (element.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            // Detener el movimiento cuando se suelta el botón del mouse:
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
+
+    // Inicializar la funcionalidad de arrastrar y soltar para los bloques de la paleta
+    document.addEventListener('DOMContentLoaded', function() {
+        const blockElements = document.querySelectorAll('.blocks-palette .block');
+        const workspace = document.querySelector('.workspace');
+
+        blockElements.forEach(block => {
+            block.addEventListener('click', function() {
+                const blockType = this.getAttribute('data-type');
+                const template = this.getAttribute('data-template') || '';
+
+                // Crear nuevo bloque en el workspace
+                const blockContainer = document.createElement('div');
+                blockContainer.className = 'block-container';
+                blockContainer.dataset.type = blockType;
+
+                // Posicionar el bloque inicialmente en el centro del workspace
+                const workspaceRect = workspace.getBoundingClientRect();
+                blockContainer.style.left = (workspaceRect.width / 2 - 100) + 'px';
+                blockContainer.style.top = (workspaceRect.height / 2 - 50) + 'px';
+
+                // Añadir header del bloque
+                const blockHeader = document.createElement('div');
+                blockHeader.className = 'block-header';
+                blockHeader.innerHTML = `
+                    <span>${blockType.replace('-block', '').toUpperCase()}</span>
+                    <button type="button" class="btn-close btn-sm remove-block"></button>
+                `;
+                blockContainer.appendChild(blockHeader);
+
+                // Añadir contenido del bloque
+                const blockContent = document.createElement('div');
+                blockContent.className = 'block-content';
+                blockContent.innerHTML = template;
+                blockContent.contentEditable = true;
+                blockContainer.appendChild(blockContent);
+
+                // Añadir el bloque al workspace
+                workspace.appendChild(blockContainer);
+
+                // Hacer el bloque arrastrable
+                makeBlockDraggable(blockContainer);
+
+                // Añadir evento para eliminar el bloque
+                blockContainer.querySelector('.remove-block').addEventListener('click', function() {
+                    workspace.removeChild(blockContainer);
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}
+

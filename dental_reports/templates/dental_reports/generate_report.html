@@ -1,0 +1,13 @@
+{% extends "dental_reports/base.html" %}
+
+{% block title %}Generar Informe | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Generar Informe</h1>
+        <p>Esta es una versión simplificada. Estamos trabajando en esta funcionalidad.</p>
+        <a href="{% url 'template_list' %}" class="btn btn-primary">Volver a plantillas</a>
+    </div>
+</div>
+{% endblock %}

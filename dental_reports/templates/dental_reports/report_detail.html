@@ -1,0 +1,13 @@
+{% extends "dental_reports/base.html" %}
+
+{% block title %}Detalle de Informe | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>{{ report.title }}</h1>
+        <p>Esta es una versión simplificada. Estamos trabajando en esta funcionalidad.</p>
+        <a href="{% url 'report_list' %}" class="btn btn-primary">Volver a informes</a>
+    </div>
+</div>
+{% endblock %}
