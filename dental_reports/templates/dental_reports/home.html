@@ -80,10 +80,10 @@
                 <h1 class="display-4 mb-4">Sistema de Informes Dentales</h1>
                 <p class="lead mb-4">Crea, personaliza y gestiona informes dentales profesionales de forma rápida y sencilla</p>
                 <div class="d-flex gap-2">
-                    <a href="{% url 'template_list' %}" class="btn btn-primary action-button">
+                    <a href="{% url 'dental_reports:template_list' %}" class="btn btn-primary action-button">
                         <i class="fas fa-file-medical me-2"></i>Ver Plantillas
                     </a>
-                    <a href="{% url 'template_create' %}" class="btn btn-success action-button">
+                    <a href="{% url 'dental_reports:template_create' %}" class="btn btn-success action-button">
                         <i class="fas fa-plus me-2"></i>Crear Nueva
                     </a>
                 </div>
@@ -105,7 +105,7 @@
                 </div>
                 <div class="stats-number">{{ templates_count|default:"0" }}</div>
                 <h5 class="card-title">Plantillas</h5>
-                <a href="{% url 'template_list' %}" class="stretched-link"></a>
+                <a href="{% url 'dental_reports:template_list' %}" class="stretched-link"></a>
             </div>
         </div>
     </div>
@@ -117,7 +117,7 @@
                 </div>
                 <div class="stats-number">{{ reports_count|default:"0" }}</div>
                 <h5 class="card-title">Informes</h5>
-                <a href="{% url 'report_list' %}" class="stretched-link"></a>
+                <a href="{% url 'dental_reports:report_list' %}" class="stretched-link"></a>
             </div>
         </div>
     </div>
@@ -129,7 +129,7 @@
                 </div>
                 <div class="stats-number">{{ clinics_count|default:"0" }}</div>
                 <h5 class="card-title">Clínicas</h5>
-                <a href="{% url 'clinic_list' %}" class="stretched-link"></a>
+                <a href="{% url 'dental_reports:clinic_list' %}" class="stretched-link"></a>
             </div>
         </div>
     </div>
@@ -141,7 +141,7 @@
                 </div>
                 <div class="stats-number">{{ dentists_count|default:"0" }}</div>
                 <h5 class="card-title">Dentistas</h5>
-                <a href="{% url 'dentist_list' %}" class="stretched-link"></a>
+                <a href="{% url 'dental_reports:dentist_list' %}" class="stretched-link"></a>
             </div>
         </div>
     </div>
@@ -157,7 +157,7 @@
                 </div>
                 <h5 class="card-title">Plantillas Personalizables</h5>
                 <p class="card-text">Crea y gestiona plantillas para diferentes tipos de informes dentales según tus necesidades.</p>
-                <a href="{% url 'template_create' %}" class="btn btn-outline-primary">Crear plantilla</a>
+                <a href="{% url 'dental_reports:template_create' %}" class="btn btn-outline-primary">Crear plantilla</a>
             </div>
         </div>
     </div>
@@ -169,7 +169,7 @@
                 </div>
                 <h5 class="card-title">Exportación a PDF</h5>
                 <p class="card-text">Genera informes profesionales en formato PDF listos para compartir con pacientes y colegas.</p>
-                <a href="{% url 'report_list' %}" class="btn btn-outline-primary">Ver informes</a>
+                <a href="{% url 'dental_reports:report_list' %}" class="btn btn-outline-primary">Ver informes</a>
             </div>
         </div>
     </div>
@@ -181,7 +181,7 @@
                 </div>
                 <h5 class="card-title">Gestión de Contactos</h5>
                 <p class="card-text">Mantén organizada tu red de clínicas y dentistas para compartir informes fácilmente.</p>
-                <a href="{% url 'dentist_list' %}" class="btn btn-outline-primary">Ver contactos</a>
+                <a href="{% url 'dental_reports:dentist_list' %}" class="btn btn-outline-primary">Ver contactos</a>
             </div>
         </div>
     </div>
@@ -197,14 +197,14 @@
                         <h5 class="mb-0">
                             <i class="fas fa-file-medical me-2"></i>Plantillas Recientes
                         </h5>
-                        <a href="{% url 'template_list' %}" class="btn btn-sm btn-outline-primary">Ver todas</a>
+                        <a href="{% url 'dental_reports:template_list' %}" class="btn btn-sm btn-outline-primary">Ver todas</a>
                     </div>
                 </div>
                 <div class="card-body">
                     {% if recent_templates %}
                         <div class="list-group list-group-flush">
                             {% for template in recent_templates %}
-                            <a href="{% url 'template_detail' pk=template.id %}" class="list-group-item list-group-item-action border-0 py-3">
+                            <a href="{% url 'dental_reports:template_detail' pk=template.id %}" class="list-group-item list-group-item-action border-0 py-3">
                                 <div class="d-flex w-100 justify-content-between">
                                     <h6 class="mb-1">{{ template.name }}</h6>
                                     <small class="text-muted">{{ template.created_at|date:"d/m/Y" }}</small>
@@ -218,7 +218,7 @@
                         <div class="text-center py-4">
                             <i class="fas fa-file-medical fa-3x text-muted mb-3"></i>
                             <p class="mb-0">No hay plantillas disponibles</p>
-                            <a href="{% url 'template_create' %}" class="btn btn-sm btn-primary mt-3">
+                            <a href="{% url 'dental_reports:template_create' %}" class="btn btn-sm btn-primary mt-3">
                                 Crear primera plantilla
                             </a>
                         </div>
@@ -233,14 +233,14 @@
                         <h5 class="mb-0">
                             <i class="fas fa-file-pdf me-2"></i>Informes Recientes
                         </h5>
-                        <a href="{% url 'report_list' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+                        <a href="{% url 'dental_reports:report_list' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
                     </div>
                 </div>
                 <div class="card-body">
                     {% if recent_reports %}
                         <div class="list-group list-group-flush">
                             {% for report in recent_reports %}
-                            <a href="{% url 'report_detail' pk=report.id %}" class="list-group-item list-group-item-action border-0 py-3">
+                            <a href="{% url 'dental_reports:report_detail' pk=report.id %}" class="list-group-item list-group-item-action border-0 py-3">
                                 <div class="d-flex w-100 justify-content-between">
                                     <h6 class="mb-1">{{ report.title }}</h6>
                                     <small class="text-muted">{{ report.created_at|date:"d/m/Y" }}</small>
@@ -254,7 +254,7 @@
                         <div class="text-center py-4">
                             <i class="fas fa-file-pdf fa-3x text-muted mb-3"></i>
                             <p class="mb-0">No hay informes generados</p>
-                            <a href="{% url 'template_list' %}" class="btn btn-sm btn-primary mt-3">
+                            <a href="{% url 'dental_reports:template_list' %}" class="btn btn-sm btn-primary mt-3">
                                 Generar primer informe
                             </a>
                         </div>

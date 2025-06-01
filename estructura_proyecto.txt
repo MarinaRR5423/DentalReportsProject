@@ -1,0 +1,70 @@
+Estructura del proyecto: DentalReportsProject
+==================================================
+
+├── ./
+│   ├── db.sqlite3
+│   ├── estructura_proyecto.txt
+│   ├── generate_project_structure.py
+│   ├── manage.py
+│   ├── DentalReportsProject/
+│   │   ├── __init__.py
+│   │   ├── asgi.py
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   ├── wsgi.py
+│   ├── dental_reports/
+│   │   ├── admin.py
+│   │   ├── forms.py
+│   │   ├── models.py
+│   │   ├── urls.py
+│   │   ├── utils.py
+│   │   ├── views.py
+│   │   ├── management/
+│   │   │   ├── _init_.py
+│   │   │   ├── commands/
+│   │   │   │   ├── _init_.py
+│   │   │   │   ├── create_default_templates.py
+│   │   ├── migrations/
+│   │   │   ├── 0001_initial.py
+│   │   │   ├── __init__.py
+│   │   ├── static/
+│   │   │   ├── dental_reports/
+│   │   │   │   ├── index.html
+│   │   │   │   ├── css/
+│   │   │   │   │   ├── visual-editor
+│   │   │   │   │   ├── visual-editor.css
+│   │   │   │   ├── img/
+│   │   │   │   ├── js/
+│   │   │   │   │   ├── visual-editor.js
+│   │   ├── templates/
+│   │   │   ├── dental_reports/
+│   │   │   │   ├── base.html
+│   │   │   │   ├── category_form.html
+│   │   │   │   ├── category_list.html
+│   │   │   │   ├── editor_visual.html
+│   │   │   │   ├── generate_report.html
+│   │   │   │   ├── home.html
+│   │   │   │   ├── report_detail.html
+│   │   │   │   ├── report_list.html
+│   │   │   │   ├── template_detail.html
+│   │   │   │   ├── template_form.html
+│   │   │   │   ├── template_list.html
+│   │   │   │   ├── vista_previa_plantilla.html
+│   │   │   │   ├── templatetags/
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── custom_filters.py
+│   │   │   │   │   ├── dental_reports_extras.py
+│   ├── media/
+│   ├── report_templates/
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── forms.py
+│   │   ├── models.py
+│   │   ├── tests.py
+│   │   ├── views.py
+│   │   ├── migrations/
+│   │   │   ├── __init__.py
+│   ├── static/
+│   │   ├── visual-editor.js
+│   ├── templates/
